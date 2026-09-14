@@ -2,6 +2,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import { initMockDb } from "./mocks/mockDb";
+initMockDb();
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

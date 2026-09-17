@@ -40,6 +40,31 @@ function ProductDetail() {
     return <h2>Không tìm thấy sản phẩm</h2>;
   }
 
+  const addToCart = () => {
+  const cart = JSON.parse(
+    localStorage.getItem("cart") || "[]"
+  );
+
+  const existingItem = cart.find(
+    (item) => item.id === product.id
+  );
+
+  if (existingItem) {
+    existingItem.quantity += 1;
+  } else {
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+    });
+  }
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+
+  alert("Đã thêm sản phẩm vào giỏ hàng!");
+};
+
   return (
     <div className="container">
 
@@ -63,7 +88,7 @@ function ProductDetail() {
           <p>{product.description}</p>
         )}
 
-        <button>
+        <button onClick={addToCart}>
           Thêm vào giỏ hàng
         </button>
 

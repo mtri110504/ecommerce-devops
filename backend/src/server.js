@@ -2,28 +2,20 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
-const db = require("./db");
-
+const productRoutes = require("./routes/productRoutes");
+const authRoutes = require("./routes/authRoutes");
 const app = express();
+const orderRoutes = require("./routes/orderRoutes");
 
 app.use(cors());
 app.use(express.json());
-
+app.use("/api/auth", authRoutes);
+app.use("/api/orders", orderRoutes);
 app.get("/", (req, res) => {
   res.send("Ecommerce Backend API is running");
 });
 
-app.get("/api/products", async (req, res) => {
-  try {
-    const [rows] = await db.query("SELECT * FROM products");
-    res.json(rows);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      message: "Lỗi kết nối database",
-    });
-  }
-});
+app.use("/api/products", productRoutes);
 
 const PORT = process.env.PORT || 5001;
 

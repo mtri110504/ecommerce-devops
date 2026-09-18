@@ -9,3 +9,4 @@ build/
 .terraform/
 *.tfstate
 *.tfstate.*
+.terraform.tfstate.lock.info

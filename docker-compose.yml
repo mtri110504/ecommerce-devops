@@ -1,0 +1,71 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: cloudtech-mysql
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+
+    ports:
+      - "3307:3306"
+
+    volumes:
+      - cloudtech-mysql-data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+    networks:
+      - cloudtech-network
+
+    healthcheck:
+      test:
+        ["CMD-SHELL", "mysqladmin ping -h localhost -p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+
+    container_name: cloudtech-backend
+
+    environment:
+      PORT: 5001
+      DB_HOST: mysql
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      JWT_SECRET: ${JWT_SECRET}
+
+    ports:
+      - "5001:5001"
+
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+    networks:
+      - cloudtech-network
+
+  frontend:
+    build:
+      context: ./frontend
+
+    container_name: cloudtech-frontend
+
+    ports:
+      - "8080:80"
+
+    depends_on:
+      - backend
+
+    networks:
+      - cloudtech-network
+
+networks:
+  cloudtech-network:
+    driver: bridge
+
+volumes:
+  cloudtech-mysql-data:

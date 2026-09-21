@@ -28,7 +28,7 @@ resource "aws_iam_role" "github_actions" {
           }
 
           StringLike = {
-            "token.actions.githubusercontent.com:sub" = "repo:mtri110504/ecommerce-devops:*"
+            "token.actions.githubusercontent.com:sub" = "repo:mtri110504@248605948/ecommerce-devops@1362369009:*"
           }
         }
       }

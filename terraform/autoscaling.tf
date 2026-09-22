@@ -15,7 +15,12 @@ resource "aws_autoscaling_group" "app" {
     version = "$Latest"
   }
 
-  health_check_type         = "EC2"
+  target_group_arns = [
+    aws_lb_target_group.frontend.arn,
+    aws_lb_target_group.backend.arn
+  ]
+
+  health_check_type         = "ELB"
   health_check_grace_period = 300
 
   tag {

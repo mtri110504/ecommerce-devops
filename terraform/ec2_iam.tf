@@ -93,3 +93,28 @@ resource "aws_iam_role_policy" "ec2_rds_secret" {
     ]
   })
 }
+
+data "aws_secretsmanager_secret" "app_jwt" {
+  name = "cloudtech/app/jwt"
+}
+
+resource "aws_iam_role_policy" "ec2_app_jwt_secret" {
+  name = "cloudtech-ec2-app-jwt-secret-policy"
+  role = aws_iam_role.ec2.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Effect = "Allow"
+
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+
+        Resource = data.aws_secretsmanager_secret.app_jwt.arn
+      }
+    ]
+  })
+}

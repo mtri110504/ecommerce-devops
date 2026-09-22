@@ -24,7 +24,7 @@ function AdminOrders() {
 
     try {
       const response = await fetch(
-        "http://localhost:5001/api/orders",
+        "/api/orders",
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -58,7 +58,7 @@ function AdminOrders() {
 
     try {
       const response = await fetch(
-        `http://localhost:5001/api/orders/${orderId}/status`,
+        `/api/orders/${orderId}/status`,
         {
           method: "PUT",
           headers: {

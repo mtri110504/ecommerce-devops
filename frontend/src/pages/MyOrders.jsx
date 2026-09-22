@@ -16,7 +16,7 @@ function MyOrders() {
       return;
     }
 
-    fetch("http://localhost:5001/api/orders/my-orders", {
+    fetch("/api/orders/my-orders", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

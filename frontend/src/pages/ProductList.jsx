@@ -7,7 +7,7 @@ function ProductList() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:5001/api/products")
+    fetch("/api/products")
       .then((response) => {
         if (!response.ok) {
           throw new Error("Không thể lấy sản phẩm");

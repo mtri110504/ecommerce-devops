@@ -23,7 +23,7 @@ function AdminProducts() {
   const fetchProducts = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5001/api/products"
+        "/api/products"
       );
 
       const data = await response.json();
@@ -75,7 +75,7 @@ function AdminProducts() {
 
     try {
       const response = await fetch(
-        "http://localhost:5001/api/products",
+        "/api/products",
         {
           method: "POST",
 
@@ -143,7 +143,7 @@ function AdminProducts() {
 
     try {
       const response = await fetch(
-        `http://localhost:5001/api/products/${editingId}`,
+        `/api/products/${editingId}`,
         {
           method: "PUT",
 
@@ -196,7 +196,7 @@ function AdminProducts() {
 
     try {
       const response = await fetch(
-        `http://localhost:5001/api/products/${id}`,
+        `/api/products/${id}`,
         {
           method: "DELETE",
 

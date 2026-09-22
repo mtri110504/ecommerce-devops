@@ -19,7 +19,7 @@ function ProductDetail() {
         setError("");
 
         const response = await fetch(
-          `http://localhost:5001/api/products/${id}`,
+          `/api/products/${id}`,
         );
 
         if (!response.ok) {

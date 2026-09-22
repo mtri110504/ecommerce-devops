@@ -67,3 +67,29 @@ resource "aws_iam_instance_profile" "ec2" {
   name = "cloudtech-ec2-instance-profile"
   role = aws_iam_role.ec2.name
 }
+
+resource "aws_iam_role_policy_attachment" "ec2_ssm" {
+  role       = aws_iam_role.ec2.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy" "ec2_rds_secret" {
+  name = "cloudtech-ec2-rds-secret-policy"
+  role = aws_iam_role.ec2.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Effect = "Allow"
+
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+
+        Resource = aws_db_instance.mysql.master_user_secret[0].secret_arn
+      }
+    ]
+  })
+}

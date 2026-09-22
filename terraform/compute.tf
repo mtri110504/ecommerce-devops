@@ -23,6 +23,19 @@ resource "aws_launch_template" "app" {
   image_id      = data.aws_ami.amazon_linux.id
   instance_type = "t3.micro"
 
+  user_data = base64encode(<<-EOF
+  #!/bin/bash
+
+  dnf update -y
+  dnf install -y docker
+
+  systemctl enable docker
+  systemctl start docker
+
+  usermod -aG docker ec2-user
+    EOF
+  )
+
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2.name
   }

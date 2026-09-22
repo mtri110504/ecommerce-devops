@@ -53,3 +53,11 @@ jobs:
 
           docker push $ECR_REGISTRY/cloudtech-frontend:$IMAGE_TAG
           docker push $ECR_REGISTRY/cloudtech-frontend:latest
+
+      - name: Start Auto Scaling instance refresh
+        run: |
+          aws autoscaling start-instance-refresh \
+          --auto-scaling-group-name cloudtech-app-asg \
+          --strategy Rolling \
+          --preferences MinHealthyPercentage=0,InstanceWarmup=180 \
+          --region ${{ vars.AWS_REGION }}

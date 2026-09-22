@@ -74,3 +74,26 @@ resource "aws_iam_role_policy" "github_actions_ecr" {
     ]
   })
 }
+
+resource "aws_iam_role_policy" "github_actions_deploy" {
+  name = "cloudtech-github-actions-deploy-policy"
+  role = aws_iam_role.github_actions.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+
+    Statement = [
+      {
+        Effect = "Allow"
+
+        Action = [
+          "autoscaling:StartInstanceRefresh",
+          "autoscaling:DescribeInstanceRefreshes",
+          "autoscaling:DescribeAutoScalingGroups"
+        ]
+
+        Resource = "*"
+      }
+    ]
+  })
+}

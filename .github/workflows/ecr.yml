@@ -80,11 +80,27 @@ jobs:
 
       - name: Backend smoke test
         run: |
-          curl --fail \
-            --retry 10 \
-            --retry-delay 3 \
-            --retry-connrefused \
-            http://localhost:5001/api/products
+          for i in {1..30}; do
+            echo "Checking backend... attempt $i/30"
+
+            if curl --fail --silent --show-error \
+              http://localhost:5001/api/products; then
+              echo ""
+              echo "Backend smoke test passed."
+              exit 0
+            fi
+
+            sleep 3
+          done
+
+          echo "Backend smoke test failed."
+          echo "=== Docker containers ==="
+          docker ps -a
+
+          echo "=== Backend logs ==="
+          docker logs cloudtech-backend
+
+          exit 1
 
       - name: Build frontend image
         run: docker build -t cloudtech-frontend:staging ./frontend

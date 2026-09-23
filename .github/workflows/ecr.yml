@@ -4,10 +4,10 @@ on:
   push:
     branches:
       - main
-     paths:
-       - "backend/**"
-       - "frontend/**"
-       - ".github/workflows/ecr.yml"
+    paths:
+      - "backend/**"
+      - "frontend/**"
+      - ".github/workflows/ecr.yml"
 
 permissions:
   contents: read

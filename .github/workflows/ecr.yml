@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+     paths:
+       - "backend/**"
+       - "frontend/**"
+       - ".github/workflows/ecr.yml"
 
 permissions:
   contents: read
@@ -55,9 +59,53 @@ jobs:
           docker push $ECR_REGISTRY/cloudtech-frontend:latest
 
       - name: Start Auto Scaling instance refresh
+        id: refresh
         run: |
-          aws autoscaling start-instance-refresh \
-          --auto-scaling-group-name cloudtech-app-asg \
-          --strategy Rolling \
-          --preferences MinHealthyPercentage=0,InstanceWarmup=180 \
-          --region ${{ vars.AWS_REGION }}
+          REFRESH_ID=$(aws autoscaling start-instance-refresh \
+            --auto-scaling-group-name cloudtech-app-asg \
+            --strategy Rolling \
+            --preferences MinHealthyPercentage=0,InstanceWarmup=180 \
+            --region ${{ vars.AWS_REGION }} \
+            --query 'InstanceRefreshId' \
+            --output text)
+
+          echo "refresh_id=$REFRESH_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for deployment
+        run: |
+          REFRESH_ID="${{ steps.refresh.outputs.refresh_id }}"
+
+          for i in {1..40}; do
+            STATUS=$(aws autoscaling describe-instance-refreshes \
+              --auto-scaling-group-name cloudtech-app-asg \
+              --instance-refresh-ids "$REFRESH_ID" \
+              --region ${{ vars.AWS_REGION }} \
+              --query 'InstanceRefreshes[0].Status' \
+              --output text)
+
+            echo "Instance Refresh status: $STATUS"
+
+            if [ "$STATUS" = "Successful" ]; then
+              echo "Deployment completed successfully."
+              exit 0
+            fi
+
+            if [ "$STATUS" = "Failed" ] || \
+               [ "$STATUS" = "Cancelled" ] || \
+               [ "$STATUS" = "RollbackFailed" ]; then
+              echo "Deployment failed: $STATUS"
+              exit 1
+            fi
+
+            sleep 15
+          done
+
+          echo "Deployment timed out."
+          exit 1
+
+      - name: Smoke test
+        run: |
+          curl --fail \
+            --retry 5 \
+            --retry-delay 10 \
+            http://cloudtech-alb-276288998.ap-southeast-1.elb.amazonaws.com/api/products

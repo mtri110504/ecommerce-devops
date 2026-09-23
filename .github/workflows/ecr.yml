@@ -53,6 +53,10 @@ jobs:
 
       - name: Initialize database
         run: |
+          docker exec cloudtech-mysql \
+            mysql -uroot \
+            -e "CREATE DATABASE IF NOT EXISTS ecommerce_db;"
+
           docker exec -i cloudtech-mysql \
             mysql -uroot ecommerce_db \
             < database/init.sql

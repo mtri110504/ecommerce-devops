@@ -14,9 +14,96 @@ permissions:
   id-token: write
 
 jobs:
-  push-images:
-    name: Push Docker Images to ECR
+  staging:
+    name: Staging Validation
     runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Create Docker network
+        run: docker network create cloudtech-staging
+
+      - name: Start MySQL
+        run: |
+          docker run -d \
+            --name cloudtech-mysql \
+            --network cloudtech-staging \
+            -e MYSQL_ROOT_PASSWORD=staging123 \
+            -e MYSQL_DATABASE=ecommerce_db \
+            mysql:8.0
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do
+            if docker exec cloudtech-mysql \
+              mysqladmin ping -h localhost -uroot -pstaging123 --silent; then
+              echo "MySQL is ready."
+              exit 0
+            fi
+
+            echo "Waiting for MySQL..."
+            sleep 5
+          done
+
+          echo "MySQL failed to start."
+          exit 1
+
+      - name: Initialize database
+        run: |
+          docker exec -i cloudtech-mysql \
+            mysql -uroot -pstaging123 ecommerce_db \
+            < database/init.sql
+
+      - name: Build backend image
+        run: docker build -t cloudtech-backend:staging ./backend
+
+      - name: Start backend
+        run: |
+          docker run -d \
+            --name cloudtech-backend \
+            --network cloudtech-staging \
+            -p 5001:5001 \
+            -e PORT=5001 \
+            -e DB_HOST=cloudtech-mysql \
+            -e DB_USER=root \
+            -e DB_PASSWORD=staging123 \
+            -e DB_NAME=ecommerce_db \
+            -e JWT_SECRET=staging-test-secret \
+            cloudtech-backend:staging
+
+      - name: Backend smoke test
+        run: |
+          curl --fail \
+            --retry 10 \
+            --retry-delay 3 \
+            --retry-connrefused \
+            http://localhost:5001/api/products
+
+      - name: Build frontend image
+        run: docker build -t cloudtech-frontend:staging ./frontend
+
+      - name: Start frontend
+        run: |
+          docker run -d \
+            --name cloudtech-frontend \
+            -p 8080:80 \
+            cloudtech-frontend:staging
+
+      - name: Frontend smoke test
+        run: |
+          curl --fail \
+            --retry 10 \
+            --retry-delay 3 \
+            --retry-connrefused \
+            http://localhost:8080/
+
+  push-images:
+    name: Production Deployment
+    runs-on: ubuntu-latest
+    needs: staging
     environment: production
 
     steps:
@@ -39,9 +126,9 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build \
-          -t $ECR_REGISTRY/cloudtech-backend:$IMAGE_TAG \
-          -t $ECR_REGISTRY/cloudtech-backend:latest \
-          ./backend
+            -t $ECR_REGISTRY/cloudtech-backend:$IMAGE_TAG \
+            -t $ECR_REGISTRY/cloudtech-backend:latest \
+            ./backend
 
           docker push $ECR_REGISTRY/cloudtech-backend:$IMAGE_TAG
           docker push $ECR_REGISTRY/cloudtech-backend:latest
@@ -52,9 +139,9 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build \
-          -t $ECR_REGISTRY/cloudtech-frontend:$IMAGE_TAG \
-          -t $ECR_REGISTRY/cloudtech-frontend:latest \
-          ./frontend
+            -t $ECR_REGISTRY/cloudtech-frontend:$IMAGE_TAG \
+            -t $ECR_REGISTRY/cloudtech-frontend:latest \
+            ./frontend
 
           docker push $ECR_REGISTRY/cloudtech-frontend:$IMAGE_TAG
           docker push $ECR_REGISTRY/cloudtech-frontend:latest
@@ -104,7 +191,7 @@ jobs:
           echo "Deployment timed out."
           exit 1
 
-      - name: Smoke test
+      - name: Production smoke test
         run: |
           curl --fail \
             --retry 5 \

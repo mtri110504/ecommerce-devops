@@ -31,7 +31,7 @@ jobs:
           docker run -d \
             --name cloudtech-mysql \
             --network cloudtech-staging \
-            -e MYSQL_ROOT_PASSWORD=staging123 \
+            -e MYSQL_ALLOW_EMPTY_PASSWORD=yes \
             -e MYSQL_DATABASE=ecommerce_db \
             mysql:8.0
 
@@ -39,7 +39,7 @@ jobs:
         run: |
           for i in {1..30}; do
             if docker exec cloudtech-mysql \
-              mysqladmin ping -h localhost -uroot -pstaging123 --silent; then
+              mysqladmin ping -h localhost -uroot --silent; then
               echo "MySQL is ready."
               exit 0
             fi
@@ -54,7 +54,7 @@ jobs:
       - name: Initialize database
         run: |
           docker exec -i cloudtech-mysql \
-            mysql -uroot -pstaging123 ecommerce_db \
+            mysql -uroot ecommerce_db \
             < database/init.sql
 
       - name: Build backend image
@@ -69,7 +69,7 @@ jobs:
             -e PORT=5001 \
             -e DB_HOST=cloudtech-mysql \
             -e DB_USER=root \
-            -e DB_PASSWORD=staging123 \
+            -e DB_PASSWORD="" \
             -e DB_NAME=ecommerce_db \
             -e JWT_SECRET=staging-test-secret \
             cloudtech-backend:staging

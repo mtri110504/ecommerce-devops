@@ -213,74 +213,57 @@ Docker images được lưu trữ trên Amazon ECR.
 
 ---
 
-## 7. CI/CD Pipeline
+## CI/CD Pipeline
 
-Pipeline sử dụng GitHub Actions.
+Hệ thống sử dụng GitHub Actions để tự động hóa quá trình kiểm thử và triển khai ứng dụng.
 
-### Continuous Integration
+Pipeline hiện tại gồm 2 giai đoạn:
 
-Khi source code được push lên repository:
+### 1. Staging Validation
 
-```text
-Git Push
-   │
-   ▼
-GitHub Actions
-   │
-   ├── Backend npm ci
-   │
-   ├── Frontend npm ci
-   │
-   ├── Frontend build
-   │
-   └── Docker build
-```
+Khi có thay đổi trong thư mục `backend`, `frontend` hoặc workflow CI/CD được push lên nhánh `main`, GitHub Actions sẽ tạo một môi trường staging tạm thời trên runner.
 
-### Continuous Deployment
+Môi trường staging gồm:
 
-Khi push vào branch `main`:
+- MySQL 8 chạy bằng Docker
+- Backend chạy bằng Docker
+- Frontend chạy bằng Docker
+- Backend smoke test tại `/api/products`
+- Frontend smoke test tại `/`
 
-```text
-Git Push
-     │
-     ▼
-GitHub Actions
-     │
-     ▼
-Authenticate AWS using OIDC
-     │
-     ▼
-Build Docker Images
-     │
-     ▼
-Push Images to Amazon ECR
-     │
-     ▼
-Start ASG Instance Refresh
-     │
-     ▼
-Launch New EC2 Instance
-     │
-     ▼
-EC2 User Data Bootstrap
-     │
-     ├── Install Docker
-     ├── Login ECR
-     ├── Read Secrets Manager
-     ├── Pull Docker Images
-     └── Start Containers
-     │
-     ▼
-Application Load Balancer
-     │
-     ▼
-Health Check
-     │
-     ▼
-Application Available
-```
+Nếu bất kỳ bước nào thất bại, Production Deployment sẽ không được thực hiện.
 
-GitHub Actions truy cập AWS thông qua OpenID Connect (OIDC), không lưu AWS Access Key trực tiếp trong GitHub.
+### 2. Production Deployment
+
+Sau khi Staging Validation thành công, workflow sẽ chờ phê duyệt thủ công thông qua GitHub Environment `production`.
+
+Sau khi được approve:
+
+1. GitHub Actions xác thực với AWS bằng OIDC.
+2. Build Docker image cho backend và frontend.
+3. Push image lên Amazon ECR.
+4. Khởi chạy Auto Scaling Instance Refresh.
+5. Chờ quá trình triển khai hoàn tất.
+6. Thực hiện Production Smoke Test qua Application Load Balancer.
+
+Luồng triển khai:
+
+````text
+Push main
+   ↓
+Staging Validation
+   ↓
+Backend + Frontend Smoke Test
+   ↓
+Manual Approval
+   ↓
+Push Docker Images to ECR
+   ↓
+Auto Scaling Instance Refresh
+   ↓
+Production Smoke Test
+   ↓
+Deployment Success
 
 ---
 
@@ -293,7 +276,7 @@ Sau khi push code lên `main`:
 ```text
 GitHub Actions
 → Success
-```
+````
 
 Auto Scaling Instance Refresh:
 
@@ -554,8 +537,6 @@ Một số chức năng có thể tiếp tục phát triển:
 - CloudWatch Dashboard.
 - Centralized application logging.
 - Blue/Green hoặc Canary Deployment.
-- Multi-environment STG/PROD hoàn chỉnh.
-- Automated smoke test trong deployment pipeline.
 - Web Application Firewall (AWS WAF).
 
 ---

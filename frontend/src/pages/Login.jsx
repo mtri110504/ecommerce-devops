@@ -12,19 +12,16 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await fetch(
-        "/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            password,
-          }),
-        }
-      );
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
 
       const data = await response.json();
 
@@ -44,107 +41,79 @@ function Login() {
   };
 
   return (
-  <main className="auth-page">
-    <div className="auth-wrapper">
+    <main className="auth-page">
+      <div className="auth-wrapper">
+        <section className="auth-banner">
+          <div className="auth-banner-content">
+            <span className="auth-brand">☁ CLOUDTECH STORE</span>
 
-      <section className="auth-banner">
-        <div className="auth-banner-content">
-          <span className="auth-brand">
-            ☁ CLOUDTECH STORE
-          </span>
+            <h1>
+              Chào mừng
+              <br />
+              bạn trở lại.
+            </h1>
 
-          <h1>
-            Chào mừng
-            <br />
-            bạn trở lại.
-          </h1>
+            <p>
+              Đăng nhập để mua sắm, theo dõi đơn hàng và trải nghiệm các sản
+              phẩm công nghệ tại CloudTech Store -demo.
+            </p>
 
-          <p>
-            Đăng nhập để mua sắm, theo dõi đơn hàng
-            và trải nghiệm các sản phẩm công nghệ
-            tại CloudTech Store.
-          </p>
-
-          <div className="auth-features">
-            <span>✓ Mua sắm nhanh chóng</span>
-            <span>✓ Theo dõi đơn hàng</span>
-            <span>✓ Sản phẩm công nghệ chính hãng</span>
+            <div className="auth-features">
+              <span>✓ Mua sắm nhanh chóng</span>
+              <span>✓ Theo dõi đơn hàng</span>
+              <span>✓ Sản phẩm công nghệ chính hãng</span>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="auth-form-section">
-        <div className="auth-form-container">
+        <section className="auth-form-section">
+          <div className="auth-form-container">
+            <span className="auth-label">ĐĂNG NHẬP</span>
 
-          <span className="auth-label">
-            ĐĂNG NHẬP
-          </span>
+            <h2>Đăng nhập tài khoản</h2>
 
-          <h2>Đăng nhập tài khoản</h2>
+            <p className="auth-subtitle">Nhập thông tin tài khoản của bạn</p>
 
-          <p className="auth-subtitle">
-            Nhập thông tin tài khoản của bạn
-          </p>
+            <form className="auth-form" onSubmit={handleSubmit}>
+              <label>Email</label>
 
-          <form
-            className="auth-form"
-            onSubmit={handleSubmit}
-          >
-            <label>Email</label>
+              <input
+                type="email"
+                placeholder="example@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
 
-            <input
-              type="email"
-              placeholder="example@email.com"
-              value={email}
-              onChange={(e) =>
-                setEmail(e.target.value)
-              }
-              required
-            />
+              <label>Mật khẩu</label>
 
-            <label>Mật khẩu</label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
 
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) =>
-                setPassword(e.target.value)
-              }
-              required
-            />
+              {message && <div className="auth-message">{message}</div>}
 
-            {message && (
-              <div className="auth-message">
-                {message}
-              </div>
-            )}
+              <button className="auth-submit" type="submit">
+                Đăng nhập →
+              </button>
+            </form>
 
-            <button
-              className="auth-submit"
-              type="submit"
-            >
-              Đăng nhập →
-            </button>
-          </form>
+            <p className="auth-switch">
+              Chưa có tài khoản? <a href="/register">Đăng ký ngay</a>
+            </p>
 
-          <p className="auth-switch">
-            Chưa có tài khoản?{" "}
-            <a href="/register">
-              Đăng ký ngay
-            </a>
-          </p>
-
-          <div className="auth-security">
-            🔒 Thông tin đăng nhập được bảo mật
+            <div className="auth-security">
+              🔒 Thông tin đăng nhập được bảo mật
+            </div>
           </div>
-
-        </div>
-      </section>
-
-    </div>
-  </main>
-);
+        </section>
+      </div>
+    </main>
+  );
 }
 
 export default Login;

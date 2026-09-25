@@ -55,7 +55,7 @@ function Login() {
 
             <p>
               Đăng nhập để mua sắm, theo dõi đơn hàng và trải nghiệm các sản
-              phẩm công nghệ tại CloudTech Store -demo.
+              phẩm công nghệ tại Minh Trí.
             </p>
 
             <div className="auth-features">

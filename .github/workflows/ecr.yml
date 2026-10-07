@@ -235,4 +235,4 @@ jobs:
           curl --fail \
             --retry 5 \
             --retry-delay 10 \
-            http://cloudtech-alb-276288998.ap-southeast-1.elb.amazonaws.com/api/products
+            http://cloudtech-alb-1368231367.ap-southeast-1.elb.amazonaws.com/api/products

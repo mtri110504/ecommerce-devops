@@ -50,7 +50,7 @@ function Login() {
             <h1>
               Chào mừng
               <br />
-              bạn trở lại.
+              Minh Trí trở lại.
             </h1>
 
             <p>
